@@ -17,16 +17,20 @@ package com.google.code.fqueue;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Random;
 
 import junit.framework.TestCase;
 
 /**
  * @author sunli
  * @date 2010-8-13
- * @version $Id$
+ * @version $Id: FSQueueTest.java 42 2011-08-16 03:00:00Z sunli1223@gmail.com $
  */
 public class FSQueueTest extends TestCase {
     private static FQueue queue;
+    
+    private static Random r = new Random();
+    
     static {
         try {
             queue = new FQueue("db");
@@ -60,6 +64,17 @@ public class FSQueueTest extends TestCase {
     public void testOffer() {
         queue.offer("testqueueoffer".getBytes());
         assertEquals(new String(queue.poll()), "testqueueoffer");
+    }
+    
+    public void testPeek(){
+    	String content = "testqueueoffer" + r.nextInt();
+    	queue.offer(content.getBytes());
+    	int size = queue.size();
+        assertEquals(new String(queue.peek()), content);
+        assertEquals(new String(queue.peek()), content);
+        assertEquals(size, queue.size());
+        assertEquals(new String(queue.poll()), content);
+        assertEquals(size - 1, queue.size());
     }
 
     public void testPoll() {
