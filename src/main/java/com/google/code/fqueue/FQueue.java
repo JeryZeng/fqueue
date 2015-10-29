@@ -32,7 +32,7 @@ import com.google.code.fqueue.exception.FileFormatException;
  * 
  * @author sunli
  * @date 2010-8-13
- * @version $Id$
+ * @version $Id: FQueue.java 2 2011-07-31 12:25:36Z sunli1223@gmail.com $
  */
 public class FQueue extends AbstractQueue<byte[]> implements Queue<byte[]>,
 		java.io.Serializable {
@@ -77,14 +77,25 @@ public class FQueue extends AbstractQueue<byte[]> implements Queue<byte[]>,
 
 	@Override
 	public byte[] peek() {
-		throw new UnsupportedOperationException("peek Unsupported now");
+		try {
+			lock.lock();
+			return fsQueue.readNext(false);
+		} catch (IOException e) {
+			log.error(e.getMessage(), e);
+			return null;
+		} catch (FileFormatException e) {
+			log.error(e.getMessage(), e);
+			return null;
+		} finally {
+			lock.unlock();
+		}
 	}
 
 	@Override
 	public byte[] poll() {
 		try {
 			lock.lock();
-			return fsQueue.readNextAndRemove();
+			return fsQueue.readNext(true);
 		} catch (IOException e) {
 			log.error(e.getMessage(), e);
 			return null;

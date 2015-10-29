@@ -35,7 +35,7 @@ import com.google.code.fqueue.exception.FileFormatException;
 /**
  *@author sunli
  *@date 2011-5-18
- *@version $Id$
+ *@version $Id: LogEntity.java 78 2014-04-02 10:09:48Z zj304292653@gmail.com $
  */
 public class LogEntity {
 	private final Logger log = LoggerFactory.getLogger(LogEntity.class);
@@ -214,8 +214,9 @@ public class LogEntity {
 		putWriterPosition(this.writerPosition);
 		return WRITESUCCESS;
 	}
-
-	public byte[] readNextAndRemove() throws FileEOFException {
+	
+	
+	public byte [] readNext() throws FileEOFException{
 		if (this.endPosition != -1 && this.readerPosition >= this.endPosition) {
 			throw new FileEOFException("file eof");
 		}
@@ -226,8 +227,16 @@ public class LogEntity {
 		mappedByteBuffer.position(this.readerPosition);
 		int length = mappedByteBuffer.getInt();
 		byte[] b = new byte[length];
-		this.readerPosition += length + 4;
 		mappedByteBuffer.get(b);
+		return b;
+	}
+
+	public byte[] readNextAndRemove() throws FileEOFException {
+		byte[] b = readNext();
+		if(b == null) {
+			return b;
+		}
+		this.readerPosition += b.length + 4;
 		putReaderPosition(this.readerPosition);
 		return b;
 	}

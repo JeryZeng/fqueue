@@ -34,7 +34,7 @@ import com.google.code.fqueue.log.LogIndex;
  * 
  * @author sunli
  * @date 2010-8-13
- * @version $Id$
+ * @version $Id: FSQueue.java 78 2014-04-02 10:09:48Z zj304292653@gmail.com $
  */
 public class FSQueue {
 	private static final Log log = LogFactory.getLog(FSQueue.class);
@@ -159,16 +159,22 @@ public class FSQueue {
 		}
 
 	}
+	
 	/**
-	 * 从队列存储中取出最先入队的数据，并移除它
+	 * 从队列存储中取出最先入队的数据
+	 * @param remove 是否移除数据
 	 * @return
 	 * @throws IOException
 	 * @throws FileFormatException
 	 */
-	public byte[] readNextAndRemove() throws IOException, FileFormatException {
+	public byte[] readNext(boolean remove) throws IOException, FileFormatException {
 		byte[] b = null;
 		try {
-			b = readerHandle.readNextAndRemove();
+			if(remove) {
+				b = readerHandle.readNextAndRemove();
+			} else {
+				b = readerHandle.readNext();
+			}
 		} catch (FileEOFException e) {
 			int deleteNum = readerHandle.getCurrentFileNumber();
 			int nextfile = readerHandle.getNextFile();
@@ -184,12 +190,16 @@ public class FSQueue {
 						nextfile);
 			}
 			try {
-				b = readerHandle.readNextAndRemove();
+				if(remove) {
+					b = readerHandle.readNextAndRemove();
+				} else {
+					b = readerHandle.readNext();
+				}
 			} catch (FileEOFException e1) {
 				log.error("read new log file FileEOFException error occurred",e1);
 			}
 		}
-		if (b != null) {
+		if (b != null && remove) {
 			db.decrementSize();
 		}
 		return b;
